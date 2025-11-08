@@ -10,7 +10,7 @@ import { toast } from "sonner";
 const Index = () => {
   const handleBookNow = (tour: TourPackage) => {
     const message = `Hi! I'm interested in booking the *${tour.name}* package (${tour.duration}) for ₹${tour.price.toLocaleString("en-IN")}. Can you provide more details?`;
-    const whatsappUrl = `https://wa.me/919876543210?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/918123200985?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, "_blank");
     toast.success("Opening WhatsApp...");
   };
@@ -82,7 +82,7 @@ const Index = () => {
                 <Phone className="h-6 w-6 text-primary" />
               </div>
               <h3 className="font-semibold mb-2">Phone</h3>
-              <p className="text-sm text-muted-foreground">+91 98765 43210</p>
+              <p className="text-sm text-muted-foreground">+91 81232 00985</p>
             </div>
             <div className="text-center p-6 bg-card rounded-lg shadow-sm">
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-4">
