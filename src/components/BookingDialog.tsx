@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { TourPackage } from "@/data/packages";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -28,19 +27,35 @@ export const BookingDialog = ({ open, onOpenChange, tour }: BookingDialogProps) 
     setLoading(true);
 
     try {
-      const { error } = await supabase.functions.invoke("send-booking", {
-        body: {
-          name: formData.name,
-          email: formData.email,
-          message: formData.message,
-          tourName: tour.name,
-          tourDuration: tour.duration,
-          tourPrice: tour.price,
-          tourLocation: tour.location,
-        },
-      });
+      // Google Form URL - Replace with your actual Google Form URL
+      const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/YOUR_FORM_ID/formResponse";
+      
+      // Google Form field entry IDs - Replace with your actual field IDs
+      const formFields = {
+        name: "entry.YOUR_NAME_FIELD_ID",
+        email: "entry.YOUR_EMAIL_FIELD_ID",
+        tourName: "entry.YOUR_TOUR_NAME_FIELD_ID",
+        tourDuration: "entry.YOUR_DURATION_FIELD_ID",
+        tourPrice: "entry.YOUR_PRICE_FIELD_ID",
+        tourLocation: "entry.YOUR_LOCATION_FIELD_ID",
+        message: "entry.YOUR_MESSAGE_FIELD_ID",
+      };
 
-      if (error) throw error;
+      const googleFormData = new FormData();
+      googleFormData.append(formFields.name, formData.name);
+      googleFormData.append(formFields.email, formData.email);
+      googleFormData.append(formFields.tourName, tour.name);
+      googleFormData.append(formFields.tourDuration, tour.duration);
+      googleFormData.append(formFields.tourPrice, tour.price.toString());
+      googleFormData.append(formFields.tourLocation, tour.location);
+      googleFormData.append(formFields.message, formData.message);
+
+      // Submit to Google Form (using no-cors mode)
+      await fetch(GOOGLE_FORM_URL, {
+        method: "POST",
+        body: googleFormData,
+        mode: "no-cors",
+      });
 
       toast.success("Booking request sent successfully!");
       setFormData({ name: "", email: "", message: "" });
