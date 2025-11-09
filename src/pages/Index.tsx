@@ -24,7 +24,13 @@ const Index = () => {
     // Fallbacks in case the first attempt is blocked
     setTimeout(() => {
       if (!win || win.closed) {
-        window.open(webUrl, "_blank", "noopener,noreferrer");
+        const w2 = window.open(webUrl, "_blank", "noopener,noreferrer");
+        setTimeout(() => {
+          if (!w2 || w2.closed) {
+            // Final fallback navigates current tab
+            window.location.href = isMobile ? mobileUrl : webUrl;
+          }
+        }, 400);
       }
     }, 400);
 
@@ -49,7 +55,7 @@ const Index = () => {
               Popular Tour Packages
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Explore our handpicked tour packages across India. From cultural heritage to
+              Explore our handpicked tour packages across India and worldwide. From cultural heritage to
               adventure, we have something for everyone.
             </p>
           </div>

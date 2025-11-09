@@ -7,6 +7,7 @@ export interface TourPackage {
   image: string;
   highlights: string[];
   category: "adventure" | "cultural" | "beach" | "wildlife" | "spiritual";
+  location: string;
 }
 
 export const tourPackages: TourPackage[] = [
@@ -24,6 +25,7 @@ export const tourPackages: TourPackage[] = [
       "Traditional cuisine experience",
     ],
     category: "cultural",
+    location: "India",
   },
   {
     id: "2",
@@ -39,6 +41,7 @@ export const tourPackages: TourPackage[] = [
       "Traditional Kerala meals",
     ],
     category: "beach",
+    location: "India",
   },
   {
     id: "3",
@@ -54,6 +57,7 @@ export const tourPackages: TourPackage[] = [
       "Local village experience",
     ],
     category: "adventure",
+    location: "India",
   },
   {
     id: "4",
@@ -69,6 +73,7 @@ export const tourPackages: TourPackage[] = [
       "Heritage hotel stays",
     ],
     category: "cultural",
+    location: "India",
   },
   {
     id: "5",
@@ -84,6 +89,7 @@ export const tourPackages: TourPackage[] = [
       "Beachside seafood dinners",
     ],
     category: "beach",
+    location: "India",
   },
   {
     id: "6",
@@ -99,5 +105,71 @@ export const tourPackages: TourPackage[] = [
       "Yoga & meditation sessions",
     ],
     category: "spiritual",
+    location: "India",
+  },
+  // International packages
+  {
+    id: "7",
+    name: "European Capitals Tour",
+    description: "Iconic cities, culture, and cuisine across Europe",
+    duration: "10 Days / 9 Nights",
+    price: 129999,
+    image: "rajasthan",
+    highlights: [
+      "Paris, Rome, and Berlin city tours",
+      "Museums & historical sites",
+      "Scenic train journeys",
+      "Local culinary experiences",
+    ],
+    category: "cultural",
+    location: "Europe",
+  },
+  {
+    id: "8",
+    name: "USA West Coast Explorer",
+    description: "From San Francisco to Los Angeles with national parks",
+    duration: "9 Days / 8 Nights",
+    price: 139999,
+    image: "goa-beach",
+    highlights: [
+      "Golden Gate Bridge",
+      "Yosemite day trip",
+      "Hollywood & Santa Monica",
+      "Las Vegas optional add-on",
+    ],
+    category: "adventure",
+    location: "Americas",
+  },
+  {
+    id: "9",
+    name: "Japan & Korea Discovery",
+    description: "Modern cities, ancient temples, and coastal beauty",
+    duration: "8 Days / 7 Nights",
+    price: 149999,
+    image: "kerala",
+    highlights: [
+      "Tokyo & Kyoto highlights",
+      "Seoul palaces & street food",
+      "Bullet train experience",
+      "Onsen & cultural workshops",
+    ],
+    category: "cultural",
+    location: "Asia-Pacific",
+  },
+  {
+    id: "10",
+    name: "South Africa Safari Adventure",
+    description: "Wildlife, wine country, and Cape Town coast",
+    duration: "7 Days / 6 Nights",
+    price: 119999,
+    image: "himalayas",
+    highlights: [
+      "Kruger National Park safari",
+      "Table Mountain & Cape Peninsula",
+      "Winelands tour",
+      "Cultural experiences",
+    ],
+    category: "wildlife",
+    location: "Africa",
   },
 ];
