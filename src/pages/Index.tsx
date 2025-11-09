@@ -3,44 +3,30 @@ import { Navigation } from "@/components/Navigation";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { TourCard } from "@/components/TourCard";
 import { Chatbot } from "@/components/Chatbot";
+import { BookingDialog } from "@/components/BookingDialog";
 import { tourPackages, TourPackage } from "@/data/packages";
 import { Phone, Mail, MapPin, Facebook, Instagram, Twitter } from "lucide-react";
-import { toast } from "sonner";
 
 const Index = () => {
+  const [selectedTour, setSelectedTour] = useState<TourPackage | null>(null);
+  const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
+
   const handleBookNow = (tour: TourPackage) => {
-    const phone = "918123200985";
-    const message = `Hi! I'm interested in booking the *${tour.name}* package (${tour.duration}) for ₹${tour.price.toLocaleString("en-IN")}. Can you provide more details?`;
-    const encoded = encodeURIComponent(message);
-
-    const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
-    const mobileUrl = `whatsapp://send?phone=${phone}&text=${encoded}`;
-    const waUrl = `https://wa.me/${phone}?text=${encoded}`;
-    const webUrl = `https://web.whatsapp.com/send?phone=${phone}&text=${encoded}`;
-
-    const primaryUrl = isMobile ? mobileUrl : waUrl;
-    const win = window.open(primaryUrl, "_blank", "noopener,noreferrer");
-
-    // Fallbacks in case the first attempt is blocked
-    setTimeout(() => {
-      if (!win || win.closed) {
-        const w2 = window.open(webUrl, "_blank", "noopener,noreferrer");
-        setTimeout(() => {
-          if (!w2 || w2.closed) {
-            // Final fallback navigates current tab
-            window.location.href = isMobile ? mobileUrl : webUrl;
-          }
-        }, 400);
-      }
-    }, 400);
-
-    toast.success("Opening WhatsApp chat...");
+    setSelectedTour(tour);
+    setBookingDialogOpen(true);
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
       <Chatbot />
+      {selectedTour && (
+        <BookingDialog
+          open={bookingDialogOpen}
+          onOpenChange={setBookingDialogOpen}
+          tour={selectedTour}
+        />
+      )}
 
       {/* Hero Section */}
       <section id="home" className="pt-20">
