@@ -9,10 +9,26 @@ import { toast } from "sonner";
 
 const Index = () => {
   const handleBookNow = (tour: TourPackage) => {
+    const phone = "918123200985";
     const message = `Hi! I'm interested in booking the *${tour.name}* package (${tour.duration}) for ₹${tour.price.toLocaleString("en-IN")}. Can you provide more details?`;
-    const whatsappUrl = `https://wa.me/918123200985?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, "_blank");
-    toast.success("Opening WhatsApp...");
+    const encoded = encodeURIComponent(message);
+
+    const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+    const mobileUrl = `whatsapp://send?phone=${phone}&text=${encoded}`;
+    const waUrl = `https://wa.me/${phone}?text=${encoded}`;
+    const webUrl = `https://web.whatsapp.com/send?phone=${phone}&text=${encoded}`;
+
+    const primaryUrl = isMobile ? mobileUrl : waUrl;
+    const win = window.open(primaryUrl, "_blank", "noopener,noreferrer");
+
+    // Fallbacks in case the first attempt is blocked
+    setTimeout(() => {
+      if (!win || win.closed) {
+        window.open(webUrl, "_blank", "noopener,noreferrer");
+      }
+    }, 400);
+
+    toast.success("Opening WhatsApp chat...");
   };
 
   return (

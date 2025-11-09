@@ -1,60 +1,89 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Mail } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Mail, Lock, LogIn, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/unique-logo.jpg";
 
 export default function Auth() {
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState("");
-  const navigate = useNavigate();
 
-  const handleSendOTP = async (e: React.FormEvent) => {
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      if (session?.user) {
+        // Already signed in, go home
+        window.location.replace("/");
+      }
+    });
+
+    // Initialize session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) window.location.replace("/");
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-        },
-      });
-
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
-
-      setOtpSent(true);
-      toast.success("OTP sent to your email!");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to send OTP");
+      toast.success("Welcome back!");
+      window.location.replace("/");
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to sign in");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleVerifyOTP = async (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+    if (password !== confirm) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
     setIsLoading(true);
-
     try {
-      const { error } = await supabase.auth.verifyOtp({
+      const redirectUrl = `${window.location.origin}/`;
+      const { data, error } = await supabase.auth.signUp({
         email,
-        token: otp,
-        type: "email",
+        password,
+        options: { emailRedirectTo: redirectUrl },
       });
-
       if (error) throw error;
 
-      toast.success("Successfully signed in!");
-      navigate("/");
-    } catch (error: any) {
-      toast.error(error.message || "Invalid OTP");
+      // Fire-and-forget welcome email (non-blocking)
+      setTimeout(() => {
+        supabase.functions.invoke("send-welcome", { body: { email } }).catch(() => {});
+      }, 0);
+
+      if (data.user) {
+        toast.success("Account created! You're now signed in.");
+        window.location.replace("/");
+      } else {
+        toast.success("Check your inbox to confirm your email.");
+      }
+    } catch (err: any) {
+      const msg = err?.message || "Failed to sign up";
+      const friendly = /already registered|User already registered/i.test(msg)
+        ? "Email already registered. Try signing in."
+        : msg;
+      toast.error(friendly);
     } finally {
       setIsLoading(false);
     }
@@ -68,74 +97,53 @@ export default function Auth() {
             <img src={logo} alt="Unique World Tours" className="h-20 w-auto" />
           </div>
           <div className="text-center">
-            <CardTitle className="text-2xl">Welcome to Unique World Tours</CardTitle>
+            <CardTitle className="text-2xl">
+              {mode === "signin" ? "Sign in to Unique World Tours" : "Create your account"}
+            </CardTitle>
             <CardDescription>
-              {otpSent
-                ? "Enter the OTP sent to your email"
-                : "Sign in with your email to continue"}
+              {mode === "signin" ? "Use your email and password to continue" : "Sign up with your email and a password"}
             </CardDescription>
           </div>
         </CardHeader>
         <CardContent>
-          {!otpSent ? (
-            <form onSubmit={handleSendOTP} className="space-y-4">
+          {mode === "signin" ? (
+            <form onSubmit={handleSignIn} className="space-y-4">
               <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium">
-                  Email Address
-                </label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full"
-                />
+                <Label htmlFor="email">Email Address</Label>
+                <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
               </div>
-              <Button
-                type="submit"
-                className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90"
-                disabled={isLoading}
-              >
-                <Mail className="mr-2 h-4 w-4" />
-                {isLoading ? "Sending..." : "Send OTP"}
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              </div>
+              <Button type="submit" className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90" disabled={isLoading}>
+                <LogIn className="mr-2 h-4 w-4" />
+                {isLoading ? "Signing in..." : "Sign In"}
+              </Button>
+              <Button type="button" variant="ghost" className="w-full" onClick={() => setMode("signup")}> 
+                Don't have an account? Create one
               </Button>
             </form>
           ) : (
-            <form onSubmit={handleVerifyOTP} className="space-y-4">
+            <form onSubmit={handleSignUp} className="space-y-4">
               <div className="space-y-2">
-                <label htmlFor="otp" className="text-sm font-medium">
-                  Enter OTP
-                </label>
-                <Input
-                  id="otp"
-                  type="text"
-                  placeholder="Enter 6-digit OTP"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  required
-                  maxLength={6}
-                  className="w-full text-center text-2xl tracking-widest"
-                />
+                <Label htmlFor="email">Email Address</Label>
+                <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
               </div>
-              <Button
-                type="submit"
-                className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90"
-                disabled={isLoading}
-              >
-                {isLoading ? "Verifying..." : "Verify OTP"}
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input id="password" type="password" placeholder="At least 6 characters" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm">Confirm Password</Label>
+                <Input id="confirm" type="password" placeholder="Re-enter password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required />
+              </div>
+              <Button type="submit" className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90" disabled={isLoading}>
+                <UserPlus className="mr-2 h-4 w-4" />
+                {isLoading ? "Creating account..." : "Create Account"}
               </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                className="w-full"
-                onClick={() => {
-                  setOtpSent(false);
-                  setOtp("");
-                }}
-              >
-                Change Email
+              <Button type="button" variant="ghost" className="w-full" onClick={() => setMode("signin")}>
+                Already have an account? Sign in
               </Button>
             </form>
           )}
