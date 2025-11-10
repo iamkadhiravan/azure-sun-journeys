@@ -19,6 +19,9 @@ export const BookingDialog = ({ open, onOpenChange, tour }: BookingDialogProps) 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
+    fromDate: "",
+    toDate: "",
     message: "",
   });
 
@@ -34,6 +37,9 @@ export const BookingDialog = ({ open, onOpenChange, tour }: BookingDialogProps) 
       const formFields = {
         name: "entry.YOUR_NAME_FIELD_ID",
         email: "entry.YOUR_EMAIL_FIELD_ID",
+        phone: "entry.YOUR_PHONE_FIELD_ID",
+        fromDate: "entry.YOUR_FROM_DATE_FIELD_ID",
+        toDate: "entry.YOUR_TO_DATE_FIELD_ID",
         tourName: "entry.YOUR_TOUR_NAME_FIELD_ID",
         tourDuration: "entry.YOUR_DURATION_FIELD_ID",
         tourPrice: "entry.YOUR_PRICE_FIELD_ID",
@@ -44,6 +50,9 @@ export const BookingDialog = ({ open, onOpenChange, tour }: BookingDialogProps) 
       const googleFormData = new FormData();
       googleFormData.append(formFields.name, formData.name);
       googleFormData.append(formFields.email, formData.email);
+      googleFormData.append(formFields.phone, formData.phone);
+      googleFormData.append(formFields.fromDate, formData.fromDate);
+      googleFormData.append(formFields.toDate, formData.toDate);
       googleFormData.append(formFields.tourName, tour.name);
       googleFormData.append(formFields.tourDuration, tour.duration);
       googleFormData.append(formFields.tourPrice, tour.price.toString());
@@ -58,7 +67,7 @@ export const BookingDialog = ({ open, onOpenChange, tour }: BookingDialogProps) 
       });
 
       toast.success("Booking request sent successfully!");
-      setFormData({ name: "", email: "", message: "" });
+      setFormData({ name: "", email: "", phone: "", fromDate: "", toDate: "", message: "" });
       onOpenChange(false);
     } catch (error) {
       console.error("Error sending booking:", error);
@@ -98,6 +107,40 @@ export const BookingDialog = ({ open, onOpenChange, tour }: BookingDialogProps) 
               required
               placeholder="Enter your email"
             />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="phone">Phone Number</Label>
+            <Input
+              id="phone"
+              type="tel"
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              required
+              placeholder="Enter your phone number"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="fromDate">From Date</Label>
+              <Input
+                id="fromDate"
+                type="date"
+                value={formData.fromDate}
+                onChange={(e) => setFormData({ ...formData, fromDate: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="toDate">To Date</Label>
+              <Input
+                id="toDate"
+                type="date"
+                value={formData.toDate}
+                onChange={(e) => setFormData({ ...formData, toDate: e.target.value })}
+                required
+                min={formData.fromDate}
+              />
+            </div>
           </div>
           <div className="space-y-2">
             <Label htmlFor="message">Message (Optional)</Label>
