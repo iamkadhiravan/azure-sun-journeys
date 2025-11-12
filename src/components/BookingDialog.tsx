@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { TourPackage } from "@/data/packages";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface BookingDialogProps {
   open: boolean;
@@ -30,43 +31,24 @@ export const BookingDialog = ({ open, onOpenChange, tour }: BookingDialogProps) 
     setLoading(true);
 
     try {
-      // Google Form URL - Replace with your actual Google Form URL
-      const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/YOUR_FORM_ID/formResponse";
-      
-      // Google Form field entry IDs - Replace with your actual field IDs
-      const formFields = {
-        name: "entry.YOUR_NAME_FIELD_ID",
-        email: "entry.YOUR_EMAIL_FIELD_ID",
-        phone: "entry.YOUR_PHONE_FIELD_ID",
-        fromDate: "entry.YOUR_FROM_DATE_FIELD_ID",
-        toDate: "entry.YOUR_TO_DATE_FIELD_ID",
-        tourName: "entry.YOUR_TOUR_NAME_FIELD_ID",
-        tourDuration: "entry.YOUR_DURATION_FIELD_ID",
-        tourPrice: "entry.YOUR_PRICE_FIELD_ID",
-        tourLocation: "entry.YOUR_LOCATION_FIELD_ID",
-        message: "entry.YOUR_MESSAGE_FIELD_ID",
-      };
-
-      const googleFormData = new FormData();
-      googleFormData.append(formFields.name, formData.name);
-      googleFormData.append(formFields.email, formData.email);
-      googleFormData.append(formFields.phone, formData.phone);
-      googleFormData.append(formFields.fromDate, formData.fromDate);
-      googleFormData.append(formFields.toDate, formData.toDate);
-      googleFormData.append(formFields.tourName, tour.name);
-      googleFormData.append(formFields.tourDuration, tour.duration);
-      googleFormData.append(formFields.tourPrice, tour.price.toString());
-      googleFormData.append(formFields.tourLocation, tour.location);
-      googleFormData.append(formFields.message, formData.message);
-
-      // Submit to Google Form (using no-cors mode)
-      await fetch(GOOGLE_FORM_URL, {
-        method: "POST",
-        body: googleFormData,
-        mode: "no-cors",
+      const { error } = await supabase.functions.invoke("send-booking", {
+        body: {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          travelDate: formData.fromDate,
+          returnDate: formData.toDate,
+          message: formData.message,
+          tourName: tour.name,
+          tourDuration: tour.duration,
+          tourPrice: tour.price,
+          tourLocation: tour.location,
+        },
       });
 
-      toast.success("Booking request sent successfully!");
+      if (error) throw error;
+
+      toast.success("Booking request submitted successfully! Check your email for confirmation.");
       setFormData({ name: "", email: "", phone: "", fromDate: "", toDate: "", message: "" });
       onOpenChange(false);
     } catch (error) {
